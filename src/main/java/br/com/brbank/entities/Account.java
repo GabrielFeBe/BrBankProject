@@ -1,17 +1,16 @@
 package br.com.brbank.entities;
 
 import br.com.brbank.enums.AccountType;
+import br.com.brbank.exceptions.BadRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.UniqueConstraint;
 import java.util.Collection;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,10 +33,16 @@ public class Account implements UserDetails {
 
   private Long balance;
 
+  private String name;
+
   private AccountType type;
 
+  private String cpf;
+
+  private boolean isActive = true;
+
   //  All of the code bellow must reset monthly,
-//  I also think it's good if we create an DB to save all the Moves made on the month that passed, using the account id to link it
+  //  I also think it's good if we create an DB to save all the transactions made on the month that's passed, using the account id to link it
   private Integer numberOfWithdraws;
 
   private Integer numberOfTransfers;
@@ -76,7 +81,7 @@ public class Account implements UserDetails {
 
   @Override
   public boolean isEnabled() {
-    return true;
+    return this.isActive;
   }
 
   public void payingTax() {
@@ -88,5 +93,42 @@ public class Account implements UserDetails {
       }
     }
   }
+
+  public void removingMoney(Long money) {
+    if (type.getType().equals("POUPANCA") && this.balance < money) {
+      throw new BadRequest("Seu saldo é menor que o dinheiro apresentado para saque");
+    } else if (type.getType().equals("CORRENTE") && this.balance - money < -500) {
+      throw new BadRequest(
+          String.format("Na sua conta o maximo de saldo negativo permitido é: %d", 500));
+    } else {
+      setBalance(this.getBalance() - money);
+    }
+  }
+
+
+  public Long withdrawMoney(Long money, Boolean isOnlyWithdraw) {
+    if (type.getType().equals("POUPANCA") && this.numberOfWithdraws >= 2 && isOnlyWithdraw) {
+      throw new BadRequest("Essa conta já teve o limite de saques do mês atingido");
+    } else {
+      this.removingMoney(money);
+      if (isOnlyWithdraw) {
+        this.numberOfWithdraws++;
+      }
+      return this.balance;
+    }
+  }
+
+  public Long transferMoney(Account account, Long money) {
+    if (type.getType().equals("POUPANCA") && this.numberOfTransfers >= 2) {
+      throw new BadRequest("Numeros de transferencias exedidas!");
+    } else {
+      var value = this.withdrawMoney(money, false);
+      account.setBalance(account.getBalance() + money);
+      this.setNumberOfTransfers(numberOfTransfers + 1);
+      return value;
+    }
+
+  }
+
 
 }

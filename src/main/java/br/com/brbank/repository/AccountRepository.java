@@ -10,4 +10,8 @@ import org.springframework.stereotype.Repository;
 public interface AccountRepository extends JpaRepository<Account, Integer> {
 
   Optional<Account> findByEmail(String email);
+
+  Optional<Account> findByEmailAndCpf(String email, String cpf);
+
+  Optional<Account> findByCpf(String cpf);
 }

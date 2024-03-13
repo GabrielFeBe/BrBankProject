@@ -1,10 +1,10 @@
 package br.com.brbank.controller;
 
-import br.com.brbank.exceptions.AccountAlreadyExist;
 import br.com.brbank.exceptions.AccountNotFound;
+import br.com.brbank.exceptions.BadRequest;
+import br.com.brbank.exceptions.NotFound;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -18,10 +18,16 @@ public class ControllerAdvisor {
         .body("Conta não encontrada");
   }
 
-  @ExceptionHandler(AccountAlreadyExist.class)
-  public ResponseEntity<String> accountAlreadyExist(AccountAlreadyExist e) {
+  @ExceptionHandler(NotFound.class)
+  public ResponseEntity<String> notFoundException(NotFound e) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+  }
+
+
+  @ExceptionHandler(BadRequest.class)
+  public ResponseEntity<String> badRequestHandler(BadRequest e) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        .body("Já existe uma conta cadastrada com esse email no servidor");
+        .body(e.getMessage());
   }
 
 

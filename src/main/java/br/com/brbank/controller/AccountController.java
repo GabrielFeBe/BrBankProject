@@ -1,13 +1,20 @@
 package br.com.brbank.controller;
 
 import br.com.brbank.dto.AccountDto;
+import br.com.brbank.dto.ActivateDto;
+import br.com.brbank.dto.DepositDto;
+import br.com.brbank.dto.TransferDto;
+import br.com.brbank.dto.WithdrawDto;
 import br.com.brbank.entities.Account;
+import br.com.brbank.exceptions.BadRequest;
 import br.com.brbank.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,7 +41,7 @@ public class AccountController {
   }
 
   @GetMapping
-  ResponseEntity<AccountDto> findAccount(@AuthenticationPrincipal Account account) {
+  public ResponseEntity<AccountDto> findAccount(@AuthenticationPrincipal Account account) {
     return ResponseEntity.status(200).body(
         this.transformAccountToDto(account)
     );
@@ -46,5 +53,41 @@ public class AccountController {
         account.getType().getType());
   }
 
+  @PutMapping(value = "deactivate")
+  public ResponseEntity<String> deactivateAccount(
+      @AuthenticationPrincipal Account account) {
+    if (!account.isActive()) {
+      throw new BadRequest("A conta já está desativada");
+    }
+    this.accountService.deactivateAccountAndActivate(account);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @PutMapping(value = "activate")
+  public ResponseEntity<String> activateAccount(@RequestBody ActivateDto activateDto) {
+    this.accountService.checkAccountThenActivate(activateDto);
+    return ResponseEntity.status(HttpStatus.OK).body("Conta reativada com sucesso");
+  }
+
+  @PostMapping(value = "transfer")
+  public ResponseEntity<Long> transferMoney(@AuthenticationPrincipal Account account, @RequestBody
+  TransferDto transferDto) {
+    var balance = this.accountService.transferMoney(account, transferDto);
+    return ResponseEntity.status(HttpStatus.OK).body(balance);
+  }
+
+  @PostMapping(value = "withdraw")
+  public ResponseEntity<Long> withdrawMoney(@AuthenticationPrincipal Account account, @RequestBody
+  WithdrawDto withdrawDto) {
+    Long balance = this.accountService.withdrawMoney(account, withdrawDto.money());
+    return ResponseEntity.status(HttpStatus.OK).body(balance);
+  }
+
+  @PostMapping(value = "deposit")
+  public ResponseEntity<Long> depositMoney(@AuthenticationPrincipal Account account, @RequestBody
+  DepositDto dto) {
+    Long balance = this.accountService.depositMoney(account, dto.money());
+    return ResponseEntity.status(HttpStatus.OK).body(balance);
+  }
 
 }
