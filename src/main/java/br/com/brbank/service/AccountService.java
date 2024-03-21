@@ -3,10 +3,15 @@ package br.com.brbank.service;
 import br.com.brbank.dto.ActivateDto;
 import br.com.brbank.dto.TransferDto;
 import br.com.brbank.entities.Account;
+import br.com.brbank.entities.Transaction;
 import br.com.brbank.exceptions.AccountNotFound;
 import br.com.brbank.exceptions.BadRequest;
 import br.com.brbank.exceptions.NotFound;
 import br.com.brbank.repository.AccountRepository;
+import br.com.brbank.repository.TransactionsRepository;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +25,12 @@ public class AccountService implements UserDetailsService {
 
   private final AccountRepository accountRepository;
 
+  private final TransactionsRepository transactionsRepository;
+
   @Autowired
-  public AccountService(AccountRepository accountRepository) {
+  public AccountService(AccountRepository accountRepository, TransactionsRepository transactionsRepository) {
     this.accountRepository = accountRepository;
+    this.transactionsRepository = transactionsRepository;
   }
 
   @Override
@@ -64,6 +72,8 @@ public class AccountService implements UserDetailsService {
     Account accountToTransfer = accountOptional.get();
     var balance = account.transferMoney(accountToTransfer, transferDto.money());
     this.accountRepository.saveAll(List.of(account, accountToTransfer));
+    var transaction = new Transaction(account,accountToTransfer, ZonedDateTime.now(), transferDto.money());
+    this.transactionsRepository.save(transaction);
     return balance;
   }
 
@@ -77,6 +87,14 @@ public class AccountService implements UserDetailsService {
     account.setBalance(account.getBalance() + money);
     this.accountRepository.save(account);
     return account.getBalance();
+  }
+
+  public Account findByCpf(String cpf) {
+     var accountOptional = this.accountRepository.findByCpf(cpf);
+    if (accountOptional.isEmpty()) {
+      throw new NotFound("Cpf não existe");
+    }
+    return accountOptional.get();
   }
 }
 

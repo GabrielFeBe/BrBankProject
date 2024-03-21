@@ -3,6 +3,7 @@ package br.com.brbank.controller;
 import br.com.brbank.dto.AccountDto;
 import br.com.brbank.dto.ActivateDto;
 import br.com.brbank.dto.DepositDto;
+import br.com.brbank.dto.OnlyCpf;
 import br.com.brbank.dto.TransferDto;
 import br.com.brbank.dto.WithdrawDto;
 import br.com.brbank.entities.Account;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "account")
+@CrossOrigin(origins = "*")
 public class AccountController {
 
   private AccountService accountService;
@@ -50,7 +53,7 @@ public class AccountController {
   private AccountDto transformAccountToDto(Account account) {
     return new AccountDto(account.getEmail(), account.getBalance(), account.getNumberOfWithdraws(),
         account.getNumberOfTransfers(), account.getNumberOfBankStatements(),
-        account.getType().getType());
+        account.getType().getType(), account.getName() );
   }
 
   @PutMapping(value = "deactivate")
@@ -67,6 +70,12 @@ public class AccountController {
   public ResponseEntity<String> activateAccount(@RequestBody ActivateDto activateDto) {
     this.accountService.checkAccountThenActivate(activateDto);
     return ResponseEntity.status(HttpStatus.OK).body("Conta reativada com sucesso");
+  }
+
+  @PostMapping("prepare")
+  public ResponseEntity<AccountDto> prepareTransfer(@RequestBody OnlyCpf cpf) {
+    var acc = transformAccountToDto(this.accountService.findByCpf(cpf.cpf()));
+    return ResponseEntity.status(HttpStatus.OK).body(acc);
   }
 
   @PostMapping(value = "transfer")
