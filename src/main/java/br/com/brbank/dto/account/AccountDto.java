@@ -1,4 +1,4 @@
-package br.com.brbank.dto;
+package br.com.brbank.dto.account;
 
 
 public record AccountDto(String email, Long balance, Integer numberOfWithdraws,

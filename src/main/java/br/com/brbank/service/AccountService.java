@@ -1,6 +1,6 @@
 package br.com.brbank.service;
 
-import br.com.brbank.dto.ActivateDto;
+import br.com.brbank.dto.account.ActivateDto;
 import br.com.brbank.dto.TransferDto;
 import br.com.brbank.entities.Account;
 import br.com.brbank.entities.Transaction;
@@ -9,9 +9,7 @@ import br.com.brbank.exceptions.BadRequest;
 import br.com.brbank.exceptions.NotFound;
 import br.com.brbank.repository.AccountRepository;
 import br.com.brbank.repository.TransactionsRepository;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;

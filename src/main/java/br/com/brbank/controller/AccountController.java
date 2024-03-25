@@ -1,7 +1,7 @@
 package br.com.brbank.controller;
 
-import br.com.brbank.dto.AccountDto;
-import br.com.brbank.dto.ActivateDto;
+import br.com.brbank.dto.account.AccountDto;
+import br.com.brbank.dto.account.ActivateDto;
 import br.com.brbank.dto.DepositDto;
 import br.com.brbank.dto.OnlyCpf;
 import br.com.brbank.dto.TransferDto;

@@ -1,7 +1,7 @@
 package br.com.brbank.controller;
 
-import br.com.brbank.dto.AuthDto;
-import br.com.brbank.dto.TokenDto;
+import br.com.brbank.dto.auth.AuthDto;
+import br.com.brbank.dto.auth.TokenDto;
 import br.com.brbank.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
