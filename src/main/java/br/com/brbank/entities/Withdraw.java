@@ -25,6 +25,14 @@ public class Withdraw {
 
   private ZonedDateTime dateOfWithdraw;
 
-  private Long amountWithdrew;
+  private Double amountWithdrew;
 
+  public Withdraw() {
+  }
+
+  public Withdraw(Account account, ZonedDateTime dateOfWithdraw, Double amountWithdrew) {
+    this.account = account;
+    this.dateOfWithdraw = dateOfWithdraw;
+    this.amountWithdrew = amountWithdrew;
+  }
 }

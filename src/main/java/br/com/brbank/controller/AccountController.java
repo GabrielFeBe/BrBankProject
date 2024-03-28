@@ -9,6 +9,8 @@ import br.com.brbank.dto.WithdrawDto;
 import br.com.brbank.entities.Account;
 import br.com.brbank.exceptions.BadRequest;
 import br.com.brbank.service.AccountService;
+import br.com.brbank.service.TransactionService;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,12 +28,16 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*")
 public class AccountController {
 
-  private AccountService accountService;
+  private final AccountService accountService;
+
+  private final TransactionService transactionService;
 
   @Autowired
-  public AccountController(AccountService accountService) {
+  public AccountController(AccountService accountService, TransactionService transactionService) {
     this.accountService = accountService;
+    this.transactionService = transactionService;
   }
+
 
   @PostMapping
   public ResponseEntity<AccountDto> createAccount(@RequestBody Account account) {
@@ -45,15 +51,25 @@ public class AccountController {
 
   @GetMapping
   public ResponseEntity<AccountDto> findAccount(@AuthenticationPrincipal Account account) {
-    return ResponseEntity.status(200).body(
-        this.transformAccountToDto(account)
-    );
+
+    var count = this.transactionService.countTransactions(account.getId());
+    if (!Objects.equals(account.getNumberOfTransfers(), count)) {
+      account.setNumberOfTransfers(count);
+      var acc = this.accountService.updateAccount(account);
+      return ResponseEntity.status(HttpStatus.OK).body(this.transformAccountToDto(acc));
+    } else {
+      return ResponseEntity.status(200).body(
+          this.transformAccountToDto(account)
+      );
+    }
+
+
   }
 
   private AccountDto transformAccountToDto(Account account) {
     return new AccountDto(account.getEmail(), account.getBalance(), account.getNumberOfWithdraws(),
-        account.getNumberOfTransfers(), account.getNumberOfBankStatements(),
-        account.getType().getType(), account.getName() );
+        account.getNumberOfTransfers(),
+        account.getType().getType(), account.getName());
   }
 
   @PutMapping(value = "deactivate")
@@ -79,23 +95,29 @@ public class AccountController {
   }
 
   @PostMapping(value = "transfer")
-  public ResponseEntity<Long> transferMoney(@AuthenticationPrincipal Account account, @RequestBody
+  public ResponseEntity<Double> transferMoney(@AuthenticationPrincipal Account account, @RequestBody
   TransferDto transferDto) {
+    var count = this.transactionService.countTransactions(account.getId());
+    if (!Objects.equals(count, account.getNumberOfTransfers())) {
+      account.setNumberOfTransfers(count);
+    }
     var balance = this.accountService.transferMoney(account, transferDto);
     return ResponseEntity.status(HttpStatus.OK).body(balance);
+
+
   }
 
   @PostMapping(value = "withdraw")
-  public ResponseEntity<Long> withdrawMoney(@AuthenticationPrincipal Account account, @RequestBody
+  public ResponseEntity<Double> withdrawMoney(@AuthenticationPrincipal Account account, @RequestBody
   WithdrawDto withdrawDto) {
-    Long balance = this.accountService.withdrawMoney(account, withdrawDto.money());
+    Double balance = this.accountService.withdrawMoney(account, withdrawDto.money());
     return ResponseEntity.status(HttpStatus.OK).body(balance);
   }
 
   @PostMapping(value = "deposit")
-  public ResponseEntity<Long> depositMoney(@AuthenticationPrincipal Account account, @RequestBody
+  public ResponseEntity<Double> depositMoney(@AuthenticationPrincipal Account account, @RequestBody
   DepositDto dto) {
-    Long balance = this.accountService.depositMoney(account, dto.money());
+    Double balance = this.accountService.depositMoney(account, dto.money());
     return ResponseEntity.status(HttpStatus.OK).body(balance);
   }
 

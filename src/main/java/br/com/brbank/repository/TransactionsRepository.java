@@ -11,5 +11,5 @@ public interface TransactionsRepository extends JpaRepository<Transaction, Integ
   List<Transaction> findByDateAndPerson(Integer month, Integer accId);
 
   @Query("SELECT COUNT(t) FROM Transaction t WHERE MONTH(t.dateOfTransaction) = ?1 AND (t.toThis.id = ?2 OR t.fromThis.id = ?2)")
-  Long countTransactions(Integer month, Integer accId);
+  Integer countTransactions(Integer month, Integer accId);
 }

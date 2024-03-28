@@ -25,6 +25,15 @@ public class Deposit {
 
   private ZonedDateTime dateOfDeposit;
 
-  private Long amountDeposited;
+  private Double amountDeposited;
+
+  public Deposit() {
+  }
+
+  public Deposit(Account account, ZonedDateTime dateOfDeposit, Double amountDeposited) {
+    this.account = account;
+    this.dateOfDeposit = dateOfDeposit;
+    this.amountDeposited = amountDeposited;
+  }
 
 }

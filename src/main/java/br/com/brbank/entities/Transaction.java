@@ -31,12 +31,12 @@ public class Transaction {
 
   private ZonedDateTime dateOfTransaction;
 
-  private Long ammountTransfered;
+  private Double ammountTransfered;
   public Transaction() {
   }
 
   public Transaction(Account fromThis, Account toThis, ZonedDateTime dateOfTransaction,
-      Long ammountTransfered) {
+      Double ammountTransfered) {
     this.fromThis = fromThis;
     this.toThis = toThis;
     this.dateOfTransaction = dateOfTransaction;

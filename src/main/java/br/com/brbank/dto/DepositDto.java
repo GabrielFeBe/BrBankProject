@@ -1,5 +1,5 @@
 package br.com.brbank.dto;
 
-public record DepositDto(Long money) {
+public record DepositDto(Double money) {
 
 }

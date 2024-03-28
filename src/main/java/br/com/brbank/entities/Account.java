@@ -31,7 +31,7 @@ public class Account implements UserDetails {
 
   private String role;
 
-  private Long balance;
+  private Double balance;
 
   private String name;
 
@@ -47,7 +47,6 @@ public class Account implements UserDetails {
 
   private Integer numberOfTransfers;
 
-  private Integer numberOfBankStatements;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -89,12 +88,12 @@ public class Account implements UserDetails {
       if (balance < 20) {
         throw new RuntimeException();
       } else {
-        this.balance -= 20L;
+        this.balance -= 20D;
       }
     }
   }
 
-  public void removingMoney(Long money) {
+  public void removingMoney(Double money) {
     if (type.getType().equals("POUPANCA") && this.balance < money) {
       throw new BadRequest("Seu saldo é menor que o dinheiro apresentado para saque");
     } else if (type.getType().equals("CORRENTE") && this.balance - money < -500) {
@@ -106,7 +105,7 @@ public class Account implements UserDetails {
   }
 
 
-  public Long withdrawMoney(Long money, Boolean isOnlyWithdraw) {
+  public Double withdrawMoney(Double money, Boolean isOnlyWithdraw) {
     if (type.getType().equals("POUPANCA") && this.numberOfWithdraws >= 2 && isOnlyWithdraw) {
       throw new BadRequest("Essa conta já teve o limite de saques do mês atingido");
     } else {
@@ -118,7 +117,7 @@ public class Account implements UserDetails {
     }
   }
 
-  public Long transferMoney(Account account, Long money) {
+  public Double transferMoney(Account account, Double money) {
     if (type.getType().equals("POUPANCA") && this.numberOfTransfers >= 2) {
       throw new BadRequest("Numeros de transferencias exedidas!");
     } else {
